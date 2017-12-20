@@ -2,6 +2,7 @@
 let CSSTransitionGroup = React.addons.CSSTransitionGroup;
 let ManageConstants = require('../../constants/ManageConstants');
 let Job = require('./JobContainer').default;
+let DueDateProject = require('./DueDateProject').default;
 
 class ProjectContainer extends React.Component {
 
@@ -540,6 +541,7 @@ class ProjectContainer extends React.Component {
                         </div>
 
                         <div className="project-footer ui grid">
+                            <DueDateProject></DueDateProject>
                             {lastAction}
                         </div>
 
