@@ -321,7 +321,7 @@ body.manage {
             }
             .job {
                 padding: 0 15px;
-                margin-bottom: 15px;
+                margin-bottom: 5px;
                 .job-header {
                     background-color: #ffffff !important;
                     padding: 0 0 !important;
@@ -712,21 +712,91 @@ body.manage {
                     }
                 }
             }
+
         }
 
         .project-footer {
-            padding: 0 30px 5px !important;
-            text-align: right;
+            padding: 0 4px 5px !important;
             background-color: #f9f9f9;
             .activity-log {
-                margin-top: -10px;
-                margin-right: -15px;
                 a {
                     text-decoration: underline;
                     color: #7d7d7d;
                     font-size: 13px;
                     &:hover {
                         text-decoration: none;
+                    }
+                }
+            }
+            .due-date-project{
+                a.open-due-date-box{
+
+                }
+                .select-date-box{
+                    .close{
+                        position: relative;
+                        top: -29px;
+                        left: 12px;
+                        text-align: center;
+                        padding: 5px 4px;
+                        margin: 0;
+                        width: 115px;
+                        height: 115px;
+                        border-radius: 15px;
+                        background: white;
+                        i{
+                            margin: 0;
+                            position: relative;
+                            top: 2px;
+                            font-size: 15px;
+                            color: #000000;
+                        }
+                    }
+                    .gmt {
+                        .gmt-outsourced {
+                            display: inline-block;
+                            margin-bottom: 10px;
+                        }
+                    }
+
+                    .gmt {
+                        font-size: 14px;
+                        font-weight: normal;
+                        float: right;
+                        clear: both;
+                        position: relative;
+                        top: 4px;
+                        .gmt-select {
+                            min-width: 107px !important;
+                            width: auto;
+                            background: transparent;
+                            padding: 12px 8px 10px;
+                            .dropdown.icon {
+                                padding: 10px 3px 0 0;
+                            }
+                            .text {
+                                .gmt-description {
+                                    display: none;
+                                }
+                            }
+                            .menu {
+                                min-width: 330px;
+                                height: 205px;
+                                .item {
+                                    border-top: 1px solid #FAFAFA;
+                                    padding: 15px 5px 15px 10px !important;
+                                    white-space: normal;
+                                    word-wrap: normal;
+                                    .gmt-value {
+                                        display: inline-block;
+                                        margin-right: 5px;
+                                    }
+                                    .gmt-description {
+                                        display: inline-block;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

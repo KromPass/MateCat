@@ -1,242 +1,241 @@
-
 let CSSTransitionGroup = React.addons.CSSTransitionGroup;
-let ManageConstants = require('../../constants/ManageConstants');
-let Job = require('./JobContainer').default;
-let DueDateProject = require('./DueDateProject').default;
+let ManageConstants = require( '../../constants/ManageConstants' );
+let Job = require( './JobContainer' ).default;
+let DueDateProject = require( './DueDateProject' ).default;
 
 class ProjectContainer extends React.Component {
 
-    constructor(props) {
-        super(props);
+    constructor( props ) {
+        super( props );
         this.state = {
             showAllJobs: true,
             visibleJobs: [],
             showAllJobsBoxes: true,
             lastAction: null,
             jobsActions: null,
-            projectName: this.props.project.get('name'),
+            projectName: this.props.project.get( 'name' ),
             inputSelected: false,
             inputNameChanged: false
         };
-        this.getActivityLogUrl = this.getActivityLogUrl.bind(this);
-        this.changeUser = this.changeUser.bind(this);
-        this.hideProject = this.hideProject.bind(this);
+        this.getActivityLogUrl = this.getActivityLogUrl.bind( this );
+        this.changeUser = this.changeUser.bind( this );
+        this.hideProject = this.hideProject.bind( this );
     }
 
-    hideProject(project) {
-        if ( this.props.project.get('id') === project.get('id') ) {
-            $(this.project).transition('fly right');
+    hideProject( project ) {
+        if ( this.props.project.get( 'id' ) === project.get( 'id' ) ) {
+            $( this.project ).transition( 'fly right' );
         }
     }
 
     initDropdowns() {
         let self = this;
-        if (this.dropdownUsers) {
-            if (this.props.project.get('id_assignee') ) {
-                $(this.dropdownUsers).dropdown('set selected', this.props.project.get('id_assignee'));
-                this.dropdownUsers.classList.remove("project-not-assigned");
-                this.dropdownUsers.classList.add("project-assignee");
-                this.dropdownUsers.classList.add("shadow-1");
+        if ( this.dropdownUsers ) {
+            if ( this.props.project.get( 'id_assignee' ) ) {
+                $( this.dropdownUsers ).dropdown( 'set selected', this.props.project.get( 'id_assignee' ) );
+                this.dropdownUsers.classList.remove( "project-not-assigned" );
+                this.dropdownUsers.classList.add( "project-assignee" );
+                this.dropdownUsers.classList.add( "shadow-1" );
             } else {
-                $(this.dropdownUsers).dropdown('set selected', -1);
-                this.dropdownUsers.classList.remove("project-assignee");
-                this.dropdownUsers.classList.remove("shadow-1");
-                this.dropdownUsers.classList.add("project-not-assigned");
+                $( this.dropdownUsers ).dropdown( 'set selected', -1 );
+                this.dropdownUsers.classList.remove( "project-assignee" );
+                this.dropdownUsers.classList.remove( "shadow-1" );
+                this.dropdownUsers.classList.add( "project-not-assigned" );
             }
-            $(this.dropdownUsers).dropdown({
+            $( this.dropdownUsers ).dropdown( {
                 fullTextSearch: 'exact',
-                onChange: function(value, text, $selectedItem) {
-                    self.changeUser(value);
+                onChange: function ( value, text, $selectedItem ) {
+                    self.changeUser( value );
                 }
-            });
-            if (this.projectTeam.get('type') == 'personal') {
-                this.dropdownUsers.classList.add("disabled");
+            } );
+            if ( this.projectTeam.get( 'type' ) == 'personal' ) {
+                this.dropdownUsers.classList.add( "disabled" );
             } else {
-                this.dropdownUsers.classList.remove("disabled");
+                this.dropdownUsers.classList.remove( "disabled" );
             }
         }
-        if (this.dropdownTeams) {
-            $(this.dropdownTeams).dropdown('set selected', this.props.project.get('id_team'));
-            $(this.dropdownTeams).dropdown({
+        if ( this.dropdownTeams ) {
+            $( this.dropdownTeams ).dropdown( 'set selected', this.props.project.get( 'id_team' ) );
+            $( this.dropdownTeams ).dropdown( {
                 fullTextSearch: 'exact',
-                onChange: function(value, text, $selectedItem) {
-                    self.changeTeam(value);
+                onChange: function ( value, text, $selectedItem ) {
+                    self.changeTeam( value );
                 }
-            });
+            } );
         }
 
 
     }
 
-    thereIsChunkOutsourced(idJob) {
+    thereIsChunkOutsourced( idJob ) {
         let self = this;
-        let outsourceChunk = this.props.project.get('jobs').find(function (item) {
-            return !!(item.get('outsource')) && item.get('id') === idJob;
-        });
-        return !_.isUndefined(outsourceChunk)
+        let outsourceChunk = this.props.project.get( 'jobs' ).find( function ( item ) {
+            return !!(item.get( 'outsource' )) && item.get( 'id' ) === idJob;
+        } );
+        return !_.isUndefined( outsourceChunk )
     }
 
     removeProject() {
-        ManageActions.updateStatusProject(this.props.project, 'cancelled');
+        ManageActions.updateStatusProject( this.props.project, 'cancelled' );
     }
 
     archiveProject() {
-        ManageActions.updateStatusProject(this.props.project, 'archived');
+        ManageActions.updateStatusProject( this.props.project, 'archived' );
     }
 
     activateProject() {
-        ManageActions.updateStatusProject(this.props.project, 'active');
+        ManageActions.updateStatusProject( this.props.project, 'active' );
     }
 
-    changeUser(value) {
+    changeUser( value ) {
         let user, idUser;
         let team = this.props.team;
-        if (this.props.team.get('type') == 'personal') {
+        if ( this.props.team.get( 'type' ) == 'personal' ) {
             team = this.projectTeam;
         }
-        if (value === '-1') {
+        if ( value === '-1' ) {
             user = -1;
             idUser = -1;
-            $(this.dropdownUsers).dropdown('hide');
+            $( this.dropdownUsers ).dropdown( 'hide' );
         } else {
-            let newUser = team.get('members').find(function (member) {
-                let user = member.get('user');
-                if (user.get('uid') === parseInt(value) ) {
+            let newUser = team.get( 'members' ).find( function ( member ) {
+                let user = member.get( 'user' );
+                if ( user.get( 'uid' ) === parseInt( value ) ) {
                     return true;
                 }
-            });
-            if (!newUser) {
+            } );
+            if ( !newUser ) {
                 return;
             }
-            user = newUser.get('user');
-            idUser = user.get('uid');
+            user = newUser.get( 'user' );
+            idUser = user.get( 'uid' );
         }
-        if ( (!this.props.project.get('id_assignee') && idUser !== -1) || (this.props.project.get('id_assignee') && idUser != this.props.project.get('id_assignee'))) {
-            ManageActions.changeProjectAssignee(team, this.props.project, user);
-        }
-    }
-
-    changeTeam(value) {
-        if ( this.props.project.get('id_team') !==  parseInt(value) ) {
-            ManageActions.changeProjectTeam(value,  this.props.project);
+        if ( (!this.props.project.get( 'id_assignee' ) && idUser !== -1) || (this.props.project.get( 'id_assignee' ) && idUser != this.props.project.get( 'id_assignee' )) ) {
+            ManageActions.changeProjectAssignee( team, this.props.project, user );
         }
     }
 
-    onKeyUpEvent(event) {
-        if(event.key == 'Enter'){
-            this.changeProjectName(event);
+    changeTeam( value ) {
+        if ( this.props.project.get( 'id_team' ) !== parseInt( value ) ) {
+            ManageActions.changeProjectTeam( value, this.props.project );
+        }
+    }
+
+    onKeyUpEvent( event ) {
+        if ( event.key == 'Enter' ) {
+            this.changeProjectName( event );
             this.inputName.blur();
         }
     }
 
     inputNameClick() {
-        this.setState({
+        this.setState( {
             inputSelected: true,
             inputNameChanged: false
-        });
+        } );
     }
 
-    inputNameOnBlur(event) {
-        this.changeProjectName(event);
+    inputNameOnBlur( event ) {
+        this.changeProjectName( event );
     }
 
     openChangeTeamModal() {
-        ModalsActions.openChangeTeamModal(this.props.project)
+        ModalsActions.openChangeTeamModal( this.props.project )
     }
 
-    changeProjectName(event) {
-        if (event.target.value !== this.props.project.get('name') && event.target.value !== '') {
-            ManageActions.changeProjectName(this.props.team, this.props.project, event.target.value);
-            this.setState({
+    changeProjectName( event ) {
+        if ( event.target.value !== this.props.project.get( 'name' ) && event.target.value !== '' ) {
+            ManageActions.changeProjectName( this.props.team, this.props.project, event.target.value );
+            this.setState( {
                 projectName: event.target.value,
                 inputNameChanged: true,
                 inputSelected: false
-            });
+            } );
         } else {
-            this.inputName.value = (this.props.project.get('name'));
-            this.setState({
+            this.inputName.value = (this.props.project.get( 'name' ));
+            this.setState( {
                 inputNameChanged: false,
                 inputSelected: false
-            });
+            } );
         }
     }
 
-    getProjectMenu(activityLogUrl) {
+    getProjectMenu( activityLogUrl ) {
 
         let menuHtml = <div className="menu">
             <div className="scrolling menu">
 
                 <a className="item" href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a>
 
-                <a className="item" onClick={this.archiveProject.bind(this)}><i className="icon-drawer icon"/>Archive project</a>
+                <a className="item" onClick={this.archiveProject.bind( this )}><i className="icon-drawer icon"/>Archive project</a>
 
-                <a className="item" onClick={this.removeProject.bind(this)}><i className="icon-trash-o icon"/>Cancel project</a>
+                <a className="item" onClick={this.removeProject.bind( this )}><i className="icon-trash-o icon"/>Cancel project</a>
             </div>
-                        </div>;
-        if ( this.props.project.get('is_archived') ) {
+        </div>;
+        if ( this.props.project.get( 'is_archived' ) ) {
             menuHtml = <div className="menu">
                 <div className="scrolling menu">
                     <a className="item" href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a>
 
-                    <a className="item" onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project icon"/>Unarchive project</a>
+                    <a className="item" onClick={this.activateProject.bind( this )}><i className="icon-drawer unarchive-project icon"/>Unarchive project</a>
 
-                    <a className="item" onClick={this.removeProject.bind(this)}><i className="icon-trash-o icon"/>Cancel project</a>
+                    <a className="item" onClick={this.removeProject.bind( this )}><i className="icon-trash-o icon"/>Cancel project</a>
                 </div>
-                        </div>;
-        } else if ( this.props.project.get('is_cancelled') ) {
+            </div>;
+        } else if ( this.props.project.get( 'is_cancelled' ) ) {
             menuHtml = <div className="menu">
 
                 <div className="scrolling menu">
                     <a className="item" href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/> Activity Log</a>
 
-                    <a className="item" onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project icon"/> Resume Project</a>
+                    <a className="item" onClick={this.activateProject.bind( this )}><i className="icon-drawer unarchive-project icon"/> Resume Project</a>
                 </div>
-                        </div>;
+            </div>;
         }
         return menuHtml;
     }
 
     getLastAction() {
         let self = this;
-        this.props.lastActivityFn(this.props.project.get('id'), this.props.project.get('password')).done(function (data) {
-            let lastAction = (data.activity[0])? data.activity[0] : null;
-            self.setState({
+        this.props.lastActivityFn( this.props.project.get( 'id' ), this.props.project.get( 'password' ) ).done( function ( data ) {
+            let lastAction = (data.activity[0]) ? data.activity[0] : null;
+            self.setState( {
                 lastAction: lastAction,
                 jobsActions: data.activity
-            });
-        });
+            } );
+        } );
     }
 
-    getLastJobAction(idJob) {
+    getLastJobAction( idJob ) {
         //Last Activity Log Action
         let lastAction;
         if ( this.state.jobsActions && this.state.jobsActions.length > 0 ) {
-            lastAction = this.state.jobsActions.find(function (job) {
+            lastAction = this.state.jobsActions.find( function ( job ) {
                 return job.id_job == idJob;
-            });
+            } );
         }
         return lastAction;
     }
 
     getActivityLogUrl() {
-        return '/activityLog/' +this.props.project.get('id')+ '/' + this.props.project.get('password');
+        return '/activityLog/' + this.props.project.get( 'id' ) + '/' + this.props.project.get( 'password' );
     }
 
     getAnalyzeUrl() {
-        return '/analyze/' + this.props.project.get('project_slug') + '/' +this.props.project.get('id')+ '-' + this.props.project.get('password');
+        return '/analyze/' + this.props.project.get( 'project_slug' ) + '/' + this.props.project.get( 'id' ) + '-' + this.props.project.get( 'password' );
     }
 
-    getJobSplitUrl(job) {
-        return '/analyze/'+ this.props.project.get('project_slug') +'/'+ this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=split&jobid=' + job.get('id');
+    getJobSplitUrl( job ) {
+        return '/analyze/' + this.props.project.get( 'project_slug' ) + '/' + this.props.project.get( 'id' ) + '-' + this.props.project.get( 'password' ) + '?open=split&jobid=' + job.get( 'id' );
     }
 
-    getJobMergeUrl(job) {
-        return '/analyze/'+ this.props.project.get('project_slug') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=merge&jobid=' + job.get('id');
+    getJobMergeUrl( job ) {
+        return '/analyze/' + this.props.project.get( 'project_slug' ) + '/' + this.props.project.get( 'id' ) + '-' + this.props.project.get( 'password' ) + '?open=merge&jobid=' + job.get( 'id' );
     }
 
-    getJobSplitOrMergeButton(isChunk, mergeUrl, splitUrl ) {
+    getJobSplitOrMergeButton( isChunk, mergeUrl, splitUrl ) {
 
-        if (isChunk) {
+        if ( isChunk ) {
             return <a className="merge ui basic button" target="_blank" href={mergeUrl}>
                 <i className="icon-compress icon"/> Merge
             </a>
@@ -246,40 +245,40 @@ class ProjectContainer extends React.Component {
     }
 
     getLastActionDate() {
-        let date = new Date(this.state.lastAction.event_date);
+        let date = new Date( this.state.lastAction.event_date );
         return date.toDateString();
     }
 
-    getJobsList(targetsLangs, jobsList, jobsLength) {
+    getJobsList( targetsLangs, jobsList, jobsLength ) {
         let self = this;
-        let chunks = [],  index;
+        let chunks = [], index;
         let tempIdsArray = [];
-        let orderedJobs = this.props.project.get('jobs');
-        orderedJobs.map(function(job, i){
+        let orderedJobs = this.props.project.get( 'jobs' );
+        orderedJobs.map( function ( job, i ) {
 
-            let next_job_id = (orderedJobs.get(i+1)) ? orderedJobs.get(i+1).get('id') : 0;
-            let job_chunks = orderedJobs.count(function (currentJob, i) {
-                return currentJob.get('id') === job.get('id');
-            });
+            let next_job_id = (orderedJobs.get( i + 1 )) ? orderedJobs.get( i + 1 ).get( 'id' ) : 0;
+            let job_chunks = orderedJobs.count( function ( currentJob, i ) {
+                return currentJob.get( 'id' ) === job.get( 'id' );
+            } );
             //To check if is a chunk (jobs with same id)
             let isChunk = false;
-            if (tempIdsArray.indexOf(job.get('id')) > -1 ) {
+            if ( tempIdsArray.indexOf( job.get( 'id' ) ) > -1 ) {
                 isChunk = true;
-                index ++;
-            }  else if ((orderedJobs.get(i+1) && orderedJobs.get(i+1).get('id') === job.get('id') )) {  //The first of the Chunk
+                index++;
+            } else if ( (orderedJobs.get( i + 1 ) && orderedJobs.get( i + 1 ).get( 'id' ) === job.get( 'id' )) ) {  //The first of the Chunk
                 isChunk = true;
-                tempIdsArray.push(job.get('id'));
+                tempIdsArray.push( job.get( 'id' ) );
                 index = 1;
-            }  else {
+            } else {
                 index = 0;
             }
 
             //Create the Jobs boxes and, if visibles, the jobs body
-            if (self.state.showAllJobs || self.state.visibleJobs.indexOf(job.get('id')) > -1 || jobsLength === 1 ) {
-                let lastAction = self.getLastJobAction(job.get('id'));
-                let isChunkOutsourced =  self.thereIsChunkOutsourced(job.get('id'));
+            if ( self.state.showAllJobs || self.state.visibleJobs.indexOf( job.get( 'id' ) ) > -1 || jobsLength === 1 ) {
+                let lastAction = self.getLastJobAction( job.get( 'id' ) );
+                let isChunkOutsourced = self.thereIsChunkOutsourced( job.get( 'id' ) );
 
-                let item = <Job key={job.get('id') + "-" + i}
+                let item = <Job key={job.get( 'id' ) + "-" + i}
                                 job={job}
                                 index={index}
                                 project={self.props.project}
@@ -290,47 +289,47 @@ class ProjectContainer extends React.Component {
                                 isChunk={isChunk}
                                 lastAction={lastAction}
                                 isChunkOutsourced={isChunkOutsourced}
-                                activityLogUrl =  {self.getActivityLogUrl()}/>;
-                chunks.push(item);
-                if ( job.get('id') !== next_job_id) {
-                    let jobList = <div className="job ui grid" key = { (i - 1) + "-" + job.get('id')}>
-                            <div className="job-body sixteen wide column">
-                                <div className="ui grid chunks">
+                                activityLogUrl={self.getActivityLogUrl()}/>;
+                chunks.push( item );
+                if ( job.get( 'id' ) !== next_job_id ) {
+                    let jobList = <div className="job ui grid" key={(i - 1) + "-" + job.get( 'id' )}>
+                        <div className="job-body sixteen wide column">
+                            <div className="ui grid chunks">
                                 {chunks}
-                                </div>
                             </div>
-                        </div>;
-                    jobsList.push(jobList);
+                        </div>
+                    </div>;
+                    jobsList.push( jobList );
                     chunks = [];
                 }
 
             }
 
-        });
+        } );
     }
 
     openAddMember() {
-        ManageActions.openAddTeamMemberModal(this.projectTeam.toJS());
+        ManageActions.openAddTeamMemberModal( this.projectTeam.toJS() );
     }
 
-    createUserDropDown(users) {
+    createUserDropDown( users ) {
         var self = this;
-        let members = users.map(function(member, i) {
-            let user = member.get('user');
-            let userIcon = <a className="ui circular label">{APP.getUserShortName(member.get('user').toJS())}</a>;
-            if ( member.get('user_metadata') ) {
+        let members = users.map( function ( member, i ) {
+            let user = member.get( 'user' );
+            let userIcon = <a className="ui circular label">{APP.getUserShortName( member.get( 'user' ).toJS() )}</a>;
+            if ( member.get( 'user_metadata' ) ) {
                 userIcon = <img className="ui avatar image ui-user-dropdown-image"
-                                src={member.get('user_metadata').get('gplus_picture') + "?sz=80"}/>;
+                                src={member.get( 'user_metadata' ).get( 'gplus_picture' ) + "?sz=80"}/>;
             }
-            return <div className="item" data-value={user.get('uid')}
-                        key={'user' + user.get('uid')}>
+            return <div className="item" data-value={user.get( 'uid' )}
+                        key={'user' + user.get( 'uid' )}>
                 {userIcon}
-                <span className="user-name-dropdown">{user.get('first_name') + " " + user.get('last_name')}</span>
+                <span className="user-name-dropdown">{user.get( 'first_name' ) + " " + user.get( 'last_name' )}</span>
             </div>
-        });
+        } );
 
         return <div className={"ui dropdown top right pointing"}
-                      ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
+                    ref={( dropdownUsers ) => this.dropdownUsers = dropdownUsers}>
                         <span className="text">
                             <div className="ui not-assigned label">
                                 <i className="icon-user22"/>
@@ -338,72 +337,72 @@ class ProjectContainer extends React.Component {
                             Not assigned
                         </span>
             <div className="ui cancel label"
-                 onClick={self.changeUser.bind(self, '-1')}>
+                 onClick={self.changeUser.bind( self, '-1' )}>
                 <i className="icon-cancel3"/>
             </div>
 
             <div className="menu">
                 {/*<div className="header"*/}
-                     {/*onClick={this.openAddMember.bind(this)}>*/}
-                    {/*<a href="#">Add New Member <i className="icon-plus3 icon right"/></a>*/}
+                {/*onClick={this.openAddMember.bind(this)}>*/}
+                {/*<a href="#">Add New Member <i className="icon-plus3 icon right"/></a>*/}
                 {/*</div>*/}
                 <div className="divider"></div>
                 <div className="ui icon search input">
                     <i className="icon-search icon"/>
-                    <input type="text" name="UserName" placeholder="Search by name." />
+                    <input type="text" name="UserName" placeholder="Search by name."/>
                 </div>
                 <div className="scrolling menu">
-                {members}
-                <div className="item cancel-item" data-value="-1">
-                    <div className="ui not-assigned label">
-                        <i className="icon-user22"/>
+                    {members}
+                    <div className="item cancel-item" data-value="-1">
+                        <div className="ui not-assigned label">
+                            <i className="icon-user22"/>
+                        </div>
+                        Not assigned
                     </div>
-                    Not assigned
-                </div>
                 </div>
             </div>
         </div>;
     }
 
     getDropDownUsers() {
-       let result = '';
-       var self = this;
-       self.projectTeam = this.props.team;
-       if (this.props.team.get("type") == 'personal') {
-           if (this.props.teams){
-               self.projectTeam = this.props.teams.find(function (team) {
-                   return team.get('id') == self.props.project.get('id_team');
-               });
-               if (self.projectTeam && self.projectTeam.get('members')) {
-                   result = this.createUserDropDown(self.projectTeam.get('members'));
-               } else {
-                   TeamsActions.getAllTeams();
-               }
-           }
-       } else if (this.props.team.get('members')) {
-           result = this.createUserDropDown(this.props.team.get('members'))
-       }
-       return result;
+        let result = '';
+        var self = this;
+        self.projectTeam = this.props.team;
+        if ( this.props.team.get( "type" ) == 'personal' ) {
+            if ( this.props.teams ) {
+                self.projectTeam = this.props.teams.find( function ( team ) {
+                    return team.get( 'id' ) == self.props.project.get( 'id_team' );
+                } );
+                if ( self.projectTeam && self.projectTeam.get( 'members' ) ) {
+                    result = this.createUserDropDown( self.projectTeam.get( 'members' ) );
+                } else {
+                    TeamsActions.getAllTeams();
+                }
+            }
+        } else if ( this.props.team.get( 'members' ) ) {
+            result = this.createUserDropDown( this.props.team.get( 'members' ) )
+        }
+        return result;
     }
 
     getDropDownTeams() {
         let result = '';
         var self = this;
-        if (this.props.teams && this.props.teams.size > 1) {
-            let teams = this.props.teams.map(function(team, i) {
-                return <div className="item " data-value={team.get('id')}
-                            key={'team-dropdown-item' + team.get('id')}>
-                    {team.get('name')}
+        if ( this.props.teams && this.props.teams.size > 1 ) {
+            let teams = this.props.teams.map( function ( team, i ) {
+                return <div className="item " data-value={team.get( 'id' )}
+                            key={'team-dropdown-item' + team.get( 'id' )}>
+                    {team.get( 'name' )}
                 </div>
-            });
+            } );
             result = <div className={"ui dropdown top right pointing project-team shadow-1 "}
-                          ref={(dropdownTeams) => this.dropdownTeams = dropdownTeams}>
+                          ref={( dropdownTeams ) => this.dropdownTeams = dropdownTeams}>
                         <span className="text">
                         </span>
-                        <div className="menu">
-                            {teams}
-                        </div>
-                    </div>;
+                <div className="menu">
+                    {teams}
+                </div>
+            </div>;
         }
         return result;
     }
@@ -411,78 +410,74 @@ class ProjectContainer extends React.Component {
     componentDidUpdate() {
         let self = this;
         this.initDropdowns();
-        console.log("Updated Project : " + this.props.project.get('id'));
+        console.log( "Updated Project : " + this.props.project.get( 'id' ) );
     }
 
     componentDidMount() {
         let self = this;
 
-        $(this.dropdown).dropdown({
-            direction : 'downward'
-        });
+        $( this.dropdown ).dropdown( {
+            direction: 'downward'
+        } );
         this.initDropdowns();
 
         this.getLastAction();
 
-        ProjectsStore.addListener(ManageConstants.HIDE_PROJECT, this.hideProject);
+        ProjectsStore.addListener( ManageConstants.HIDE_PROJECT, this.hideProject );
     }
 
     componentWillUnmount() {
-        ProjectsStore.removeListener(ManageConstants.HIDE_PROJECT, this.hideProject);
+        ProjectsStore.removeListener( ManageConstants.HIDE_PROJECT, this.hideProject );
     }
 
-    shouldComponentUpdate(nextProps, nextState){
-        return (!nextProps.project.equals(this.props.project) ||
-        nextState.lastAction !==  this.state.lastAction ||
-        !nextProps.team.equals(this.props.team) ||
-        !nextProps.teams.equals(this.props.teams) ||
-        nextState.inputSelected !==  this.state.inputSelected ||
-        nextState.inputNameChanged !==  this.state.inputNameChanged
+    shouldComponentUpdate( nextProps, nextState ) {
+        return (!nextProps.project.equals( this.props.project ) ||
+            nextState.lastAction !== this.state.lastAction ||
+            !nextProps.team.equals( this.props.team ) ||
+            !nextProps.teams.equals( this.props.teams ) ||
+            nextState.inputSelected !== this.state.inputSelected ||
+            nextState.inputNameChanged !== this.state.inputNameChanged
         )
     }
 
     render() {
         let self = this;
         let activityLogUrl = this.getActivityLogUrl();
-        let projectMenu = this.getProjectMenu(activityLogUrl);
+        let projectMenu = this.getProjectMenu( activityLogUrl );
         // let tMIcon = this.checkTMIcon();
-        let payableWords = this.props.project.get('tm_analysis');
+        let payableWords = this.props.project.get( 'tm_analysis' );
         let analyzeUrl = this.getAnalyzeUrl();
-        let jobsLength = this.props.project.get('jobs').size;
+        let jobsLength = this.props.project.get( 'jobs' ).size;
 
         let targetsLangs = [], jobsList = [];
         //The list of jobs
-        this.getJobsList(targetsLangs, jobsList, jobsLength);
+        this.getJobsList( targetsLangs, jobsList, jobsLength );
 
 
         //Last Activity Log Action
         let lastAction;
-        if (this.state.lastAction ) {
+        if ( this.state.lastAction ) {
             let date = this.getLastActionDate();
-            lastAction = <div className="sixteen wide right aligned column pad-top-0 pad-bottom-0">
-                <div className="activity-log">
-                    <a href={activityLogUrl} target="_blank" className="right activity-log" title="Activity log">
-                        <i> <span>Last action: {this.state.lastAction.action + ' on ' + date}</span><span> by {this.state.lastAction.first_name }</span></i>
-                    </a>
-                </div>
+            lastAction = <div className="activity-log">
+                <a href={activityLogUrl} target="_blank" className="right activity-log" title="Activity log">
+                    <i> <span>Last action: {this.state.lastAction.action + ' on ' + date}</span><span> by {this.state.lastAction.first_name}</span></i>
+                </a>
             </div>;
         } else {
-            lastAction = <div className="sixteen wide right aligned column pad-top-0 pad-bottom-0">
-                <div className="activity-log">
-                    <a href={activityLogUrl} target="_blank" className="right activity-log" title="Activity log">
-                        <i> <span>Created on: {this.props.project.get('jobs').first().get('formatted_create_date')}</span></i>
-                    </a>
-                </div>
+            lastAction = <div className="activity-log">
+                <a href={activityLogUrl} target="_blank" className="right activity-log" title="Activity log">
+                    <i> <span>Created on: {this.props.project.get( 'jobs' ).first().get( 'formatted_create_date' )}</span></i>
+                </a>
             </div>;
 
         }
 
         // Project State (Archived or Cancelled)
         let state = '';
-        if ( this.props.project.get('is_archived') ) {
-            state =  <div className="status-filter">(archived)</div>;
-        }  else if ( this.props.project.get('is_cancelled') ) {
-            state =  <div className="status-filter">(cancelled)</div>;
+        if ( this.props.project.get( 'is_archived' ) ) {
+            state = <div className="status-filter">(archived)</div>;
+        } else if ( this.props.project.get( 'is_cancelled' ) ) {
+            state = <div className="status-filter">(cancelled)</div>;
         }
 
         // Users dropdown
@@ -490,68 +485,73 @@ class ProjectContainer extends React.Component {
         let dropDownTeams = this.getDropDownTeams();
         //Input Class
         let inputClass = (this.state.inputSelected) ? 'selected' : '';
-        let inputIcon = (this.state.inputNameChanged) ? <i className="icon-checkmark green icon" /> : <i className="icon-pencil icon" />;
+        let inputIcon = (this.state.inputNameChanged) ? <i className="icon-checkmark green icon"/> : <i className="icon-pencil icon"/>;
 
-        return <div className="project ui column grid shadow-1" id={"project-" + this.props.project.get('id')}
-                    ref={(project) => this.project = project}>
+        return <div className="project ui column grid shadow-1" id={"project-" + this.props.project.get( 'id' )}
+                    ref={( project ) => this.project = project}>
 
-                    <div className="sixteen wide column">
-                        <div className="project-header ui grid">
+            <div className="sixteen wide column">
+                <div className="project-header ui grid">
 
-                            <div className="eight wide column">
-                                <div className="ui stackable grid">
-                                    <div className="sixteen wide column">
-                                        <div className="ui ribbon label">
-                                            <div className="project-id" title="Project id">
-                                                {"(" + this.props.project.get('id') + ")"}
-                                            </div>
-                                            <div className="project-name" title="Project name">
-                                                {this.state.projectName}
-                                            </div>
-                                                {state}
-                                        </div>
+                    <div className="eight wide column">
+                        <div className="ui stackable grid">
+                            <div className="sixteen wide column">
+                                <div className="ui ribbon label">
+                                    <div className="project-id" title="Project id">
+                                        {"(" + this.props.project.get( 'id' ) + ")"}
                                     </div>
+                                    <div className="project-name" title="Project name">
+                                        {this.state.projectName}
+                                    </div>
+                                    {state}
                                 </div>
                             </div>
-
-                            <div className="eight wide right floated column pad-top-8">
-                                <div className="ui mobile reversed stackable grid right aligned">
-                                    <div className="sixteen wide right floated column">
-
-                                        <div className="project-activity-icon">
-                                            {dropDownTeams}
-                                            {dropDownUsers}
-                                            <div className="project-menu ui icon top right pointing dropdown circular button" title="Project menu"
-                                                    ref={(dropdown) => this.dropdown = dropdown}>
-                                                <i className="icon-more_vert icon" />
-                                                {projectMenu}
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-
-
                         </div>
-                        <div className="project-body ui grid">
-                            <div className="jobs sixteen wide column pad-bottom-0">
-                                {jobsList}
-                            </div>
-                        </div>
-
-                        <div className="project-footer ui grid">
-                            <DueDateProject></DueDateProject>
-                            {lastAction}
-                        </div>
-
-
                     </div>
-                </div>;
+
+                    <div className="eight wide right floated column pad-top-8">
+                        <div className="ui mobile reversed stackable grid right aligned">
+                            <div className="sixteen wide right floated column">
+
+                                <div className="project-activity-icon">
+                                    {dropDownTeams}
+                                    {dropDownUsers}
+                                    <div className="project-menu ui icon top right pointing dropdown circular button" title="Project menu"
+                                         ref={( dropdown ) => this.dropdown = dropdown}>
+                                        <i className="icon-more_vert icon"/>
+                                        {projectMenu}
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div className="project-body ui grid">
+                    <div className="jobs sixteen wide column pad-bottom-0">
+                        {jobsList}
+                    </div>
+                </div>
+
+                <div className="project-footer ui grid">
+                    <div className="eight wide column pad-top-0 pad-bottom-0">
+                        <DueDateProject
+                            project={this.props.project} />
+                    </div>
+                    <div className="eight wide right aligned column pad-top-0 pad-bottom-0">
+                        {lastAction}
+                    </div>
+                </div>
+
+
+            </div>
+        </div>;
 
 
     }
 }
 
 
-export default ProjectContainer ;
+export default ProjectContainer;

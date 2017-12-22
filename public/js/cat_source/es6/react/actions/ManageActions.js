@@ -294,7 +294,16 @@ let ManageActions = {
             UI.reloadProjects();
         });
     },
-
+    changeProjectDueDate: function (date,idProject,pass) {
+        API.PROJECTS.changeProjectDueDate(date, idProject,pass).done(
+            function (response) {
+                AppDispatcher.dispatch({
+                    actionType: ManageConstants.CHANGE_PROJECT_DUE_DATE,
+                    newProject: response
+                });
+            }
+        );
+    },
     assignTranslator: function (projectId, jobId, jobPassword, translator) {
         if ($('body').hasClass('manage')) {
             AppDispatcher.dispatch({

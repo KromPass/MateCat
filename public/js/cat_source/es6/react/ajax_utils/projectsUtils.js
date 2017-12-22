@@ -92,7 +92,16 @@ API.PROJECTS = {
             url : "/api/v2/teams/" + idOrg + "/projects/" + idProject,
         });
     },
-
+    changeProjectDueDate: function ( date,idProject, pass ) {
+        var data = {
+            due_date: date
+        };
+        return $.ajax({
+            data: JSON.stringify(data),
+            type: "post",
+            url : "/api/v2/projects/" + idProject +"/" + pass +"/due_date",
+        });
+    },
     changeProjectTeam: function (newTeamId, project) {
         var data = {
             id_team: newTeamId

@@ -90,7 +90,15 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         this.projects = this.projects.setIn([indexProject,'name'], newProject.name);
         this.projects = this.projects.setIn([indexProject,'project_slug'], newProject.project_slug);
     },
-
+    changeProjectDueDate: function ( project ) {
+        console.log(project);
+        let projectOld = this.projects.find(function (prj) {
+            return prj.get('id') == project.id;
+        });
+        let indexProject = this.projects.indexOf(projectOld);
+        this.projects = this.projects.setIn([indexProject,'due_date'], project.due_date);
+        this.projects = this.projects.setIn([indexProject,'project_slug'], project.project_slug);
+    },
     changeProjectAssignee: function (project, user) {
         let uid;
         if (user !== -1)  {
@@ -196,6 +204,10 @@ AppDispatcher.register(function(action) {
             break;
         case ManageConstants.CHANGE_PROJECT_NAME:
             ProjectsStore.changeProjectName(action.project, action.newProject);
+            ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
+            break;
+        case ManageConstants.CHANGE_PROJECT_DUE_DATE:
+            ProjectsStore.changeProjectDueDate(action.newProject);
             ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.CHANGE_PROJECT_ASSIGNEE:

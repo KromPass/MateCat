@@ -13,6 +13,7 @@ module.exports = keyMirror({
     OPEN_JOB_TM_PANEL: null,
     NO_MORE_PROJECTS: null,
     CHANGE_PROJECT_NAME: null,
+    CHANGE_PROJECT_DUE_DATE: null,
     HIDE_PROJECT: null,
     ASSIGN_TRANSLATOR: null,
     SHOW_RELOAD_SPINNER: null,
