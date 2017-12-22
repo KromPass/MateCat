@@ -7,7 +7,7 @@ class DueDateProject extends React.Component {
     constructor( props ) {
         super( props );
         let date;
-        this.props.project.get('due_date') ? date = new Date(this.props.project.get('due_date')*1000) : date = new Date();
+        this.props.project.get('due_date') ? date = moment(this.props.project.get('due_date')*1000) : date = moment();
         this.state = {
             date: date,
             timezone: $.cookie( "matecat_timezone")
@@ -26,9 +26,9 @@ class DueDateProject extends React.Component {
         let time = $(this.dropdownTime).dropdown('get value');
         date.setHours(time[0]);
         // TODO : Change this line when the time change
-        date.setMinutes(date.getMinutes() + (1 - parseFloat(this.state.timezone)) * 60);
-        console.log(date.getTime());
-        let timestamp = date.getTime()/1000;
+        date.setMinutes(date.getMinutes());
+
+        let timestamp = moment.utc(date).unix();
         ManageActions.changeProjectDueDate(timestamp,this.props.project.get('id'), this.props.project.get('password'))
     }
 
@@ -48,8 +48,13 @@ class DueDateProject extends React.Component {
         let self = this;
         let time = 12;
         if (this.props.project.get('due_date')) {
-            let date = APP.getGMTDate(this.props.project.get('due_date') * 1000);
-            time =  date.time2.split(":")[0];
+            /*let date = APP.getGMTDate(this.props.project.get('due_date') * 1000);
+            console.log(date);*/
+            time = moment(this.props.project.get('due_date') * 1000).format('HH:mm');
+            console.log('<<<<>>>>')
+            console.log(time);
+            time =  time.split(":")[0];
+            console.log(time);
         }
         $(this.dropdownTime).dropdown({
             onChange: function(value, text, $selectedItem) {
@@ -74,9 +79,10 @@ class DueDateProject extends React.Component {
 
     render() {
         let self = this;
-
+        let screenDate;
+        this.props.project.get('due_date') ? screenDate = this.state.date.format('llll') : screenDate = "Due date project";
         return <div className="due-date-project">
-            <a href="#" className="open-due-date-box"><b>Due date project</b></a>
+            <a href="#" className="open-due-date-box"><b>{screenDate}</b></a>
 
             <div className="select-date-box">
                 {/*<a className="close shadow-1">
@@ -88,7 +94,7 @@ class DueDateProject extends React.Component {
                             <label>Delivery Date</label>
                             <div className="ui calendar" ref={( calendar ) => this.calendar = calendar}>
                                 <div className="ui input">
-                                    <input type="text" placeholder="Date" defaultValue={this.state.date}/>
+                                    <input type="text" placeholder="Date" defaultValue={this.state.date.format()}/>
                                 </div>
                             </div>
                         </div>
@@ -112,9 +118,6 @@ class DueDateProject extends React.Component {
                                 <option value="20">8:00 PM</option>
                                 <option value="21">9:00 PM</option>
                             </select>
-                        </div>
-                        <div className="field gmt">
-                            <GMTSelect changeValue={this.changeTimezone.bind( this )}/>
                         </div>
                         <div className="field">
                             <button className="set-date ui blue basic button"
