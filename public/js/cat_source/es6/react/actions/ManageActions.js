@@ -299,7 +299,7 @@ let ManageActions = {
             function (response) {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.CHANGE_PROJECT_DUE_DATE,
-                    newProject: response
+                    newProject: response.project
                 });
             }
         );

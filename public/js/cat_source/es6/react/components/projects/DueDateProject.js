@@ -1,6 +1,4 @@
 let CSSTransitionGroup = React.addons.CSSTransitionGroup;
-let GMTSelect = require('../outsource/GMTSelect').default;
-/*let ManageActions = require('../../actions/ManageActions').default;*/
 
 class DueDateProject extends React.Component {
 
@@ -9,16 +7,8 @@ class DueDateProject extends React.Component {
         let date;
         this.props.project.get('due_date') ? date = moment(this.props.project.get('due_date')*1000) : date = moment();
         this.state = {
-            date: date,
-            timezone: $.cookie( "matecat_timezone")
+            date: date
         };
-    }
-
-    changeTimezone(value) {
-        $.cookie( "matecat_timezone" , value);
-        this.setState({
-            timezone: value
-        });
     }
 
     changeDueDate(){
@@ -48,13 +38,8 @@ class DueDateProject extends React.Component {
         let self = this;
         let time = 12;
         if (this.props.project.get('due_date')) {
-            /*let date = APP.getGMTDate(this.props.project.get('due_date') * 1000);
-            console.log(date);*/
             time = moment(this.props.project.get('due_date') * 1000).format('HH:mm');
-            console.log('<<<<>>>>')
-            console.log(time);
             time =  time.split(":")[0];
-            console.log(time);
         }
         $(this.dropdownTime).dropdown({
             onChange: function(value, text, $selectedItem) {

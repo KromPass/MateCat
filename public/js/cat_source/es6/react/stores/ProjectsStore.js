@@ -91,7 +91,7 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         this.projects = this.projects.setIn([indexProject,'project_slug'], newProject.project_slug);
     },
     changeProjectDueDate: function ( project ) {
-        console.log(project);
+        /*console.log(project);*/
         let projectOld = this.projects.find(function (prj) {
             return prj.get('id') == project.id;
         });
